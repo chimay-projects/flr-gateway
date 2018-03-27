@@ -10,3 +10,7 @@ target
 .project
 bin
 tmp
+
+# greadle
+.gradle/
+build/
