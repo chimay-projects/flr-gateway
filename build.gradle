@@ -1,0 +1,76 @@
+buildscript {
+  repositories {
+    maven {
+        url "https://repo.spring.io/plugins-release/"
+    }
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:1.5.10.RELEASE"
+    classpath 'io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE'
+  }
+}
+
+apply plugin: "java"
+apply plugin: "application"
+apply plugin: "org.springframework.boot"
+
+ext {
+    grpcVersion = "1.10.0"
+}
+
+archivesBaseName = 'flr-gateway'
+version = '0.0.1'
+
+repositories {
+    maven {
+        url "https://maven.repository.redhat.com/ga/"
+    }
+    maven {
+        url "https://repository.jboss.org/nexus/content/groups/public"
+    }
+    maven {
+        url "https://maven.repository.redhat.com/earlyaccess/all"
+    }
+    maven { url 'https://jitpack.io' }
+   	mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.apache.cxf:cxf-spring-boot-starter-jaxrs'
+    compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
+
+    compile('org.lognet:grpc-spring-boot-starter:2.1.5') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter'
+    }
+    compile 'com.github.literalice:flr-api:master-SNAPSHOT'
+
+    if (JavaVersion.current().isJava9Compatible()) {
+        // Workaround for @javax.annotation.Generated
+        // see: https://github.com/grpc/grpc-java/issues/3633
+        compile 'javax.annotation:javax.annotation-api:1.3.1'
+    }
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.jboss.arquillian.junit:arquillian-junit-standalone'
+    testCompile ('org.arquillian.cube:arquillian-cube-openshift') {
+        exclude module: 'undertow-core'
+    }
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'ch.qos.logback:logback-core'
+    testCompile 'ch.qos.logback:logback-classic'
+    testCompile 'io.rest-assured:rest-assured:3.0.7'
+}
+
+dependencyManagement {
+  imports {
+    mavenBom 'io.openshift.booster:spring-boot-booster-parent:1.5.10-9-rhoar'
+  }
+}
+
+springBoot {
+  executable = true
+}
