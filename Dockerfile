@@ -5,4 +5,4 @@ RUN ./gradlew build && rm -rf ~/.gradle ./.gradle && chmod +x ./build/libs/flr-g
 
 EXPOSE 8080
 
-CMD ./build/libs/flr-api-0.0.1.jar
+CMD ./build/libs/flr-gateway-0.0.1.jar
