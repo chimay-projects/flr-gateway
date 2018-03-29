@@ -24,7 +24,7 @@ pipeline {
         script {
             openshift.withCluster() {
                 openshift.withProject() {
-                        echo "build project: ${openshift.project()}"
+                  sh "./gradlew build"
                 }
             }
         }
