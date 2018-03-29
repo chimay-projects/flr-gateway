@@ -30,7 +30,7 @@ pipeline {
       steps {
         script {
           openshift.withCluster() {
-            openshift.newBuild("--name=flr-gateway-image", "--image-stream=openjdk18-openshift", "--binary")
+            openshift.newBuild("--name=flr-gateway-image", "--image-stream=openjdk18-openshift", "--binary" , "--to=flr-gateway")
           }
         }
       }
@@ -47,6 +47,30 @@ pipeline {
         }
       }
     }
+    stage('Promote to DEV') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.tag("flr-gateway:latest", "flr-gateway:dev")
+          }
+        }
+      }
+    }
+    stage('Create DEV') {
+      when {
+        expression {
+          openshift.withCluster() {
+            return !openshift.selector('dc', 'flr-gateway-dev').exists()
+          }
+        }
+      }
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.newApp("flr-gateway:dev", "--name=flr-gateway-dev").narrow('svc').expose()
+          }
+        }
+      }
+    }
   }
 }
-
