@@ -8,29 +8,22 @@ pipeline {
     timeout(time: 20, unit: 'MINUTES')
   }
   stages {
-    stage('preamble') {
-        steps {
-            script {
-                openshift.withCluster() {
-                    openshift.withProject() {
-                        echo "Using project: ${openshift.project()}"
-                    }
-                }
-            }
-        }
-    }
     stage('Create Image Builder') {
       when {
         expression {
           openshift.withCluster() {
-            return !openshift.selector("bc", "flr-gateway-image").exists()
+              openshift.withProject("development-flr") {
+                return !openshift.selector("bc", "flr-gateway").exists()
+              }
           }
         }
       }
       steps {
         script {
           openshift.withCluster() {
-            openshift.newBuild("--name=flr-gateway-image", "--image-stream=openjdk18-openshift", "--binary" , "--to=flr-gateway")
+            openshift.withProject("development-flr") {
+              openshift.newBuild("--name=flr-gateway", "--image-stream=openshift/jdk", "--binary")
+            }
           }
         }
       }
@@ -39,9 +32,9 @@ pipeline {
       steps {
         script {
             openshift.withCluster() {
-                openshift.withProject() {
-                  sh "./gradlew build"
-                  openshift.selector("bc", "flr-gateway-image").startBuild("--from-file=build/libs/app.jar", "--wait")
+                sh "./gradlew build"
+                openshift.withProject("development-flr") {
+                  openshift.selector("bc", "flr-gateway").startBuild("--from-file=build/libs/app.jar", "--wait")
                 }
             }
         }
@@ -51,7 +44,9 @@ pipeline {
       steps {
         script {
           openshift.withCluster() {
-            openshift.tag("flr-gateway:latest", "flr-gateway:dev")
+            openshift.withProject("development-flr") {
+              openshift.tag("flr-gateway:latest", "flr-gateway:dev")
+            }
           }
         }
       }
@@ -60,14 +55,18 @@ pipeline {
       when {
         expression {
           openshift.withCluster() {
-            return !openshift.selector('dc', 'flr-gateway-dev').exists()
+            openshift.withProject("development-flr") {
+              return !openshift.selector('dc', 'flr-gateway').exists()
+            }
           }
         }
       }
       steps {
         script {
           openshift.withCluster() {
-            openshift.newApp("flr-gateway:dev", "--name=flr-gateway-dev").narrow('svc').expose()
+            openshift.withProject("development-flr") {
+              openshift.newApp("flr-gateway:dev", "--name=flr-gateway").narrow('svc').expose()
+            }
           }
         }
       }
