@@ -13,7 +13,7 @@ pipeline {
         expression {
           openshift.withCluster() {
               openshift.withProject("development-flr") {
-                return !openshift.selector("bc", "flr-gateway").exists()
+                return !openshift.selector("bc", "gateway").exists()
               }
           }
         }
@@ -22,7 +22,7 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject("development-flr") {
-              openshift.newBuild("--name=flr-gateway", "--image-stream=openshift/jdk", "--binary")
+              openshift.newBuild("--name=gateway", "--image-stream=openshift/jdk", "--binary")
             }
           }
         }
@@ -34,7 +34,7 @@ pipeline {
             openshift.withCluster() {
                 sh "./gradlew build"
                 openshift.withProject("development-flr") {
-                  openshift.selector("bc", "flr-gateway").startBuild("--from-file=build/libs/app.jar", "--wait")
+                  openshift.selector("bc", "gateway").startBuild("--from-file=build/libs/app.jar", "--wait")
                 }
             }
         }
@@ -45,7 +45,7 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject("development-flr") {
-              openshift.tag("flr-gateway:latest", "flr-gateway:dev")
+              openshift.tag("gateway:latest", "gateway:dev")
             }
           }
         }
@@ -56,7 +56,7 @@ pipeline {
         expression {
           openshift.withCluster() {
             openshift.withProject("development-flr") {
-              return !openshift.selector('dc', 'flr-gateway').exists()
+              return !openshift.selector('dc', 'gateway').exists()
             }
           }
         }
@@ -65,7 +65,7 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject("development-flr") {
-              openshift.newApp("flr-gateway:dev", "--name=flr-gateway").narrow('svc').expose()
+              openshift.newApp("gateway:dev", "--name=gateway").narrow('svc').expose()
             }
           }
         }
