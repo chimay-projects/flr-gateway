@@ -38,7 +38,7 @@ public class GreetingEndpoint {
     @Path("/greeting")
     @Produces("application/json")
     public Map greeting(@QueryParam("name") @DefaultValue("World") String name) throws Exception {
-        ManagedChannel channel = ManagedChannelBuilder.forAddress("flr-api", 6565).usePlaintext(true).build();
+        ManagedChannel channel = ManagedChannelBuilder.forAddress("api", 6565).usePlaintext(true).build();
         GreetingServiceGrpc.GreetingServiceBlockingStub blockingStub = GreetingServiceGrpc.newBlockingStub(channel);
 
         Greeting request = Greeting.newBuilder().setName(name).build();
