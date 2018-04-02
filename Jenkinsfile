@@ -22,7 +22,7 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject("development-flr") {
-              openshift.newBuild("--name=gateway", "--image-stream=openshift/jdk", "--binary")
+              openshift.newBuild("--name=gateway", "--image-stream=openshift/jdk8", "--binary")
             }
           }
         }
